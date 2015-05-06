@@ -8,7 +8,7 @@ In such cases, the only way to decrypt the files is to pay a ransom for the decr
 criminals website.
 
 This tool automates the process of recovering files from Dropbox client after that were encrypted and deleted 
-during ransomware activity. It uses the previous versions feature of Dropbox.
+during ransomware activity. It uses the Previous Version feature of Dropbox.
 
 Usage:
 ------
