@@ -4,12 +4,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 # This tool automates the process of recovering files from Dropbox site after that were encrypted and deleted during
 # ransomware activity. It uses the previous versions feature of Dropbox.
-#
-# Most modern ransomwares include a mechanism which uses strong encryption in order to encrypt users files.
-# Files with extensions like: .pdf, .xlsx, .docx and etc. are targets for encryption. The key generated for the strong
-# decryption is stored at a remote server and thus makes the recovery process without backup almost impossible.
-# In such cases, the only way to decrypt the files is to pay a ransom for the decryption service served
-# at the criminals website.
+
 
 __author__ = 'Mor Kalfon (zefferno)'
 __version__ = '1.0'
@@ -22,6 +17,7 @@ import dropbox
 from argparse import ArgumentParser
 from time import sleep
 from datetime import datetime
+from unicodedata import normalize
 
 
 APP_KEY = 'v6j6tteotwt908i'
@@ -51,9 +47,9 @@ def connect_dropbox():
         print()
 
         code = input('Paste the authorization code here: ')
-        access_token, user_id = flow.finish(code.strip())
+        token, user_id = flow.finish(code.strip())
 
-        return access_token
+        return token
 
     # Check if we already have token
     if os.path.exists(TOKEN_FILE):
@@ -70,12 +66,12 @@ def connect_dropbox():
     return client
 
 
-def restore_file(client, encrypted_file_path, extensions, up_to_revision_to_restore=1):
+def restore_file(client, encrypted_file_path, extensions, rev_num=0):
     """ Restore file from Dropbox
     :param client: DropboxClient instance
     :param encrypted_file_path: Path to the encrypted file
     :param extensions: Extensions of files identified as encrypted
-    :param up_to_revision_to_restore: Optional. Up to this number of recent revisions will be restored.
+    :param rev_num: Optional. Up to revision number to restore
     :return: restored file metadata
     """
 
@@ -89,14 +85,20 @@ def restore_file(client, encrypted_file_path, extensions, up_to_revision_to_rest
     # Fetch metadata for file
     metadata = retrieve_metadata(client, path, deleted_files=True)
     # Get file list
-    files_list = get_list_from_metadata(metadata, extensions, False, True)
+    files_list = get_list_from_metadata(metadata, extensions, include_ext=False, include_deleted=True)
 
     for file in filter(lambda f: get_file_name(f) == filename, files_list):
-        revisions = client.revisions(file, rev_limit=up_to_revision_to_restore)
-        if revisions:
-            revision_to_restore = revisions.pop()
-            print("Restoring: " + file)
-            restored_file_metadata = client.restore(file, revision_to_restore['rev'])
+        revisions = client.revisions(file, rev_limit=REVISIONS_LIMIT)
+        revisions_dict = dict((parse_datetime(r['modified']), r) for r in revisions)
+        revisions_by_datetime = sorted(revisions_dict)
+        
+        if rev_num <= len(revisions_by_datetime):
+            target_revision = revisions_dict.pop(revisions_by_datetime[rev_num])
+        else:
+            return None
+
+        print("Restoring: " + file)
+        restored_file_metadata = client.restore(file, target_revision['rev'])
 
     return restored_file_metadata
 
@@ -172,6 +174,15 @@ def print_logo():
     print()
 
 
+def string_normalizer(string):
+    """ Normalize string being sent to the Dropbox server
+    :param string: String to be normalized
+    :return: Normalized string
+    """
+
+    return normalize('NFC', string).encode('utf-8')
+
+
 def get_file_extension(path):
     """ Get filename extension from full path
     :param path: Full path to file
@@ -186,6 +197,7 @@ def get_file_name(path):
     :param path: Full path to file
     :return: Filename
     """
+
     return os.path.splitext(os.path.basename(path))[0]
 
 
@@ -236,8 +248,8 @@ def get_list_from_metadata(metadata, extensions, include_ext=True, include_delet
     return files_list
 
 
-def parse_date(string):
-    """ Parse the string according to the datetime format of the core API
+def parse_datetime(string):
+    """ Format the string according to the datetime format of the core API
     :param string: String to parse
     :return: Parsed datetime format
     """
@@ -255,14 +267,13 @@ def retrieve_metadata(client, path, deleted_files=False, file_limits=FILE_LIMIT)
     """
 
     try:
-        #normalize('NFC', string).encode('utf-8')
+        normalize('NFC', path).encode('utf-8')
         metadata = client.metadata(path, include_deleted=deleted_files, file_limit=file_limits)
     except dropbox.rest.ErrorResponse as e:
         print('Dropbox Exception: ' + str(e))
         return []
 
     return metadata
-
 
 
 def main():
@@ -279,10 +290,6 @@ def main():
                         help='Destination directory where to place recovered files.')
     parser.add_argument('-re', '--revision', type=int, dest='revision', choices=range(1, FILE_LIMIT),
                         metavar='[1-%s]' % FILE_LIMIT, help='Previous revision to restore.')
-    parser.add_argument('-de', '--delete-encrypted', dest='delete_encrypted', action='store_false',
-                        help='Delete encrypted files after successful restore.')
-    parser.add_argument('-t', '--test', dest='test', action='store_true',
-                        help='Test mode. Do not make changes, just print intentions to screen.')
 
     args = parser.parse_args()
 
