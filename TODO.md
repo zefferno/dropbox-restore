@@ -2,4 +2,4 @@
 -------
 
 - [ ] Add delete after restore support.
-- [ ] Add simulation mode (changes on the fly).
+- [ ] Add simulation mode (no changes).
