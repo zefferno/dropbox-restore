@@ -7,8 +7,9 @@ for the strong decryption is stored somewhere in a remote C&C server and thus ma
 backup almost impossible. In such cases, the only way to decrypt the files is to pay a ransom for the 
 decryption service.
 
-This is where this tool comes into play. This tool automates the process of recovering files from Dropbox client 
-after that were encrypted and deleted during ransomware activity. It uses the Previous Version feature of Dropbox.
+This is where this tool comes into play. It fully automates the process of recovering files from Dropbox client 
+after that were encrypted and deleted during ransomware activity. In order to recover files it uses
+the "Previous Versions" feature of Dropbox service.
 
 Usage instructions:
 -------------------
