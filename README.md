@@ -2,16 +2,16 @@ dropbox-restore
 ===============
 
 Most modern Ransomwares include a mechanism which uses strong encryption in order to encrypt users files.
-Files with extensions like: .pdf, .xlsx, .docx and etc. are targets for encryption. The key generated for the strong
-decryption is stored at a remote server and thus makes the recovery process without backup almost impossible. 
-In such cases, the only way to decrypt the files is to pay a ransom for the decryption service served at the 
-criminals website.
+Files with extensions: .pdf, .xlsx, .docx and etc. are main targets for ransomware encryption. The key generated 
+for the strong decryption is stored somewhere in a remote C&C server and thus makes the recovery process without 
+backup almost impossible. In such cases, the only way to decrypt the files is to pay a ransom for the 
+decryption service.
 
-This tool automates the process of recovering files from Dropbox client after that were encrypted and deleted 
-during ransomware activity. It uses the Previous Version feature of Dropbox.
+This is where this tool comes into play. This tool automates the process of recovering files from Dropbox client 
+after that were encrypted and deleted during ransomware activity. It uses the Previous Version feature of Dropbox.
 
-Usage:
-------
+Usage instructions:
+-------------------
 
 To restore the folder "/photos/nyc" to the last available revision use:
 
