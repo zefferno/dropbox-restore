@@ -1,24 +1,20 @@
 dropbox-restore
 ===============
 
-Most modern Ransomwares include a mechanism which uses strong encryption in order to encrypt users files.
-Files with extensions: .pdf, .xlsx, .docx and etc. are main targets for ransomware encryption. The key generated 
-for the strong decryption is stored somewhere in a remote C&C server and thus makes the recovery process without 
-backup almost impossible. In such cases, the only way to decrypt the files is to pay a ransom for the 
-decryption service.
+Most modern Ransomwares include a mechanism which uses a strong encryption to encrypt victim files.
+Files with extensions: pdf, xlsx, docx and etc. are main targets for ransomware encryption attack. The keys generated 
+for the strong encryption are stored in a remote C&C server, thus makes the recovery process most times almost impossible. In such scenarios, most targets tend to pay ransom to use the decryption service.
 
-This is where this tool comes into play. It fully automates the process of recovering files from Dropbox client 
-after that were encrypted and deleted during ransomware activity. In order to recover files it uses
-the "Previous Versions" feature of Dropbox service.
+This tool utilizes Dropbox recovery (a.k.a "Previous Versions") feature in Dropbox service, to recover files from Dropbox. It automates the necessary steps to recover files from Dropbox.
 
 Usage instructions:
 -------------------
 
-To restore the folder "/photos/nyc" to the last available revision use:
+To restore the folder "/photos/nyc" to the last available revision, use:
 
     python restore.py -r /photos/nyc -ext .dlnsvc
     
-Note that the path "/photos/nyc" should be relative to your Dropbox folder; it should not include the path to the Dropbox folder on your hard drive. You will be prompted to confirm access to your Dropbox account through your web browser.
+Note that the path "/photos/nyc" should be relative to your Dropbox folder; it should not include the path to the Dropbox folder on your hard drive. You will be prompted to confirm access to your Dropbox account through the web browser.
 
 General Requirements:
 ---------------------
